@@ -1,0 +1,69 @@
+image: hashicorp/terraform:1.11.3
+
+stages:
+  - init
+  - plan
+  - apply
+
+variables:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+before_script:
+  - terraform -version
+
+# -----------------------
+# EC2
+# -----------------------
+init_ec2:
+  stage: init
+  script:
+    - cd EC2
+    - terraform init
+
+plan_ec2:
+  stage: plan
+  script:
+    - cd EC2
+    - terraform init
+    - terraform plan
+  needs: ["init_ec2"]
+
+apply_ec2:
+  stage: apply
+  script:
+    - cd EC2
+    - terraform init
+    - terraform apply -auto-approve
+  needs: ["plan_ec2"]
+  when: manual
+  only:
+    - main
+
+# -----------------------
+# S3
+# -----------------------
+init_s3:
+  stage: init
+  script:
+    - cd s3-terraform
+    - terraform init
+
+plan_s3:
+  stage: plan
+  script:
+    - cd s3-terraform
+    - terraform init
+    - terraform plan
+  needs: ["init_s3"]
+
+apply_s3:
+  stage: apply
+  script:
+    - cd s3-terraform
+    - terraform init
+    - terraform apply -auto-approve
+  needs: ["plan_s3"]
+  when: manual
+  only:
+    - main
